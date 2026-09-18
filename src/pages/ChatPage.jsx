@@ -13,11 +13,11 @@ import {
 } from 'lucide-react';
 import { useClubData } from '../context/ClubDataContext';
 import { useAuth } from '../context/AuthContext';
-import { MEMBERS, INITIAL_CHANNELS } from '../data/members';
+import { INITIAL_CHANNELS } from '../data/members';
 
 export const ChatPage = () => {
   const { messages, sendMessage, toggleReaction } = useClubData();
-  const { currentUser } = useAuth();
+  const { currentUser, allMembers } = useAuth();
 
   const [activeType, setActiveType] = useState('channel'); // 'channel' | 'dm'
   const [activeTargetId, setActiveTargetId] = useState('general');
@@ -44,7 +44,7 @@ export const ChatPage = () => {
   });
 
   const activeChannel = INITIAL_CHANNELS.find(c => c.id === activeTargetId);
-  const activeDmUser = MEMBERS.find(m => m.id === activeTargetId);
+  const activeDmUser = allMembers.find(m => m.id === activeTargetId);
 
   // Auto scroll to bottom
   useEffect(() => {
@@ -133,7 +133,7 @@ export const ChatPage = () => {
             </div>
             
             <div className="space-y-1">
-              {MEMBERS.map(m => {
+              {allMembers.map(m => {
                 const isMe = m.id === currentUser?.id;
                 const isSelected = activeType === 'dm' && activeTargetId === m.id;
                 return (
@@ -223,7 +223,7 @@ export const ChatPage = () => {
             </div>
           ) : (
             currentMessages.map(msg => {
-              const sender = MEMBERS.find(m => m.id === msg.senderId);
+              const sender = allMembers.find(m => m.id === msg.senderId);
               const isMe = msg.senderId === currentUser?.id;
               return (
                 <div

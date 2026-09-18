@@ -14,11 +14,10 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useClubData } from '../context/ClubDataContext';
-import { MEMBERS } from '../data/members';
 import { generateGoogleCalendarUrl } from '../utils/googleMeet';
 
 export const Dashboard = ({ setCurrentTab, onOpenTaskModal, onOpenMeetingModal }) => {
-  const { currentUser } = useAuth();
+  const { currentUser, allMembers } = useAuth();
   const { tasks, meetings, messages, activities, createInstantMeeting, updateTaskStatus } = useClubData();
 
   // Metrics
@@ -145,7 +144,7 @@ export const Dashboard = ({ setCurrentTab, onOpenTaskModal, onOpenMeetingModal }
             </div>
           </div>
           <div className="mt-4">
-            <div className="text-2xl font-display font-black text-white">{MEMBERS.length} Members</div>
+            <div className="text-2xl font-display font-black text-white">{allMembers.length} Members</div>
             <p className="text-[11px] text-emerald-400 mt-0.5 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
               All 12 Authorized & Active
@@ -324,7 +323,7 @@ export const Dashboard = ({ setCurrentTab, onOpenTaskModal, onOpenMeetingModal }
             </div>
 
             <div className="mt-3 space-y-2 max-h-80 overflow-y-auto pr-1">
-              {MEMBERS.map((m) => {
+              {allMembers.map((m) => {
                 const isCurrent = m.id === currentUser?.id;
                 const memberTasks = tasks.filter(t => t.assigneeId === m.id && t.status !== 'done').length;
                 return (
@@ -376,7 +375,7 @@ export const Dashboard = ({ setCurrentTab, onOpenTaskModal, onOpenMeetingModal }
 
             <div className="mt-3 space-y-2">
               {messages.slice(-3).map((msg) => {
-                const sender = MEMBERS.find(m => m.id === msg.senderId);
+                const sender = allMembers.find(m => m.id === msg.senderId);
                 return (
                   <div key={msg.id} className="p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/80 text-xs">
                     <div className="flex items-center justify-between mb-1">

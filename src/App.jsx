@@ -6,6 +6,7 @@ import { Sidebar } from './components/Sidebar';
 import { LoginPage } from './pages/LoginPage';
 import { TaskModal } from './components/TaskModal';
 import { MeetingModal } from './components/MeetingModal';
+import { ProfileModal } from './components/ProfileModal';
 import { Dashboard } from './pages/Dashboard';
 import { TasksPage } from './pages/TasksPage';
 import { MeetingsPage } from './pages/MeetingsPage';
@@ -18,6 +19,7 @@ function MainPortal() {
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isMeetingModalOpen, setIsMeetingModalOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   // If user is not authenticated, show strict Login Gate
   if (!currentUser) {
@@ -30,6 +32,7 @@ function MainPortal() {
       <Navbar
         onOpenTaskModal={() => setIsTaskModalOpen(true)}
         onOpenMeetingModal={() => setIsMeetingModalOpen(true)}
+        onOpenProfileModal={() => setIsProfileModalOpen(true)}
       />
 
       {/* Main Layout */}
@@ -71,6 +74,7 @@ function MainPortal() {
             <MembersPage
               setCurrentTab={setCurrentTab}
               onOpenTaskModal={() => setIsTaskModalOpen(true)}
+              onOpenProfileModal={() => setIsProfileModalOpen(true)}
             />
           )}
         </main>
@@ -84,6 +88,10 @@ function MainPortal() {
       <MeetingModal
         isOpen={isMeetingModalOpen}
         onClose={() => setIsMeetingModalOpen(false)}
+      />
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
       />
     </div>
   );

@@ -19,11 +19,10 @@ import {
 import confetti from 'canvas-confetti';
 import { useClubData } from '../context/ClubDataContext';
 import { useAuth } from '../context/AuthContext';
-import { MEMBERS } from '../data/members';
 
 export const TasksPage = ({ onOpenTaskModal }) => {
   const { tasks, updateTaskStatus, deleteTask } = useClubData();
-  const { currentUser } = useAuth();
+  const { currentUser, allMembers } = useAuth();
 
   const [viewMode, setViewMode] = useState('kanban'); // 'kanban' | 'list'
   const [filterAssignee, setFilterAssignee] = useState('all');
@@ -48,7 +47,7 @@ export const TasksPage = ({ onOpenTaskModal }) => {
       const q = searchQuery.toLowerCase();
       const matchTitle = task.title.toLowerCase().includes(q);
       const matchDesc = task.description?.toLowerCase().includes(q);
-      const assigneeName = MEMBERS.find(m => m.id === task.assigneeId)?.name.toLowerCase() || '';
+      const assigneeName = allMembers.find(m => m.id === task.assigneeId)?.name.toLowerCase() || '';
       if (!matchTitle && !matchDesc && !assigneeName.includes(q)) return false;
     }
     return true;
@@ -150,7 +149,7 @@ export const TasksPage = ({ onOpenTaskModal }) => {
           >
             <option value="all">Assignee: All (12 Members)</option>
             <option value="me">Assigned to Me ({currentUser?.name})</option>
-            {MEMBERS.map(m => (
+            {allMembers.map(m => (
               <option key={m.id} value={m.id}>{m.name} ({m.role})</option>
             ))}
           </select>
@@ -215,7 +214,7 @@ export const TasksPage = ({ onOpenTaskModal }) => {
                     </div>
                   ) : (
                     colTasks.map(task => {
-                      const assignee = MEMBERS.find(m => m.id === task.assigneeId);
+                      const assignee = allMembers.find(m => m.id === task.assigneeId);
                       return (
                         <div
                           key={task.id}
@@ -318,7 +317,7 @@ export const TasksPage = ({ onOpenTaskModal }) => {
                   </tr>
                 ) : (
                   filteredTasks.map(task => {
-                    const assignee = MEMBERS.find(m => m.id === task.assigneeId);
+                    const assignee = allMembers.find(m => m.id === task.assigneeId);
                     return (
                       <tr key={task.id} className="hover:bg-slate-900/40 transition-colors">
                         <td className="p-3.5 pl-5">

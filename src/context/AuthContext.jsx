@@ -6,8 +6,19 @@ const AuthContext = createContext();
 const STORAGE_KEY = 'hobby_club_2k26_current_user';
 const PASSWORDS_KEY = 'hobby_club_2k26_custom_passwords';
 const SETTINGS_KEY = 'hobby_club_2k26_settings';
+const AVATARS_KEY = 'hobby_club_2k26_custom_avatars';
 
 export const AuthProvider = ({ children }) => {
+  // Avatars store for customized profile photos
+  const [avatars, setAvatars] = useState(() => {
+    try {
+      const saved = localStorage.getItem(AVATARS_KEY);
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
   // Passwords store to allow updating passwords
   const [passwords, setPasswords] = useState(() => {
     try {
@@ -23,13 +34,11 @@ export const AuthProvider = ({ children }) => {
     try {
       const saved = localStorage.getItem(SETTINGS_KEY);
       return saved ? JSON.parse(saved) : {
-        permanentMeetUrl: 'https://meet.google.com/new?authuser=smitbarmate15@gmail.com',
-        hostEmail: 'smitbarmate15@gmail.com',
+        permanentMeetUrl: 'https://meet.google.com/new',
       };
     } catch {
       return {
-        permanentMeetUrl: 'https://meet.google.com/new?authuser=smitbarmate15@gmail.com',
-        hostEmail: 'smitbarmate15@gmail.com',
+        permanentMeetUrl: 'https://meet.google.com/new',
       };
     }
   });
@@ -41,7 +50,13 @@ export const AuthProvider = ({ children }) => {
       if (saved) {
         const parsed = JSON.parse(saved);
         const member = MEMBERS.find(m => m.id === parsed.id);
-        if (member) return member;
+        if (member) {
+          const savedAvatars = JSON.parse(localStorage.getItem(AVATARS_KEY) || '{}');
+          return {
+            ...member,
+            avatar: savedAvatars[member.id] || member.avatar
+          };
+        }
       }
     } catch (e) {
       console.error('Failed to retrieve user session', e);
@@ -62,8 +77,47 @@ export const AuthProvider = ({ children }) => {
   }, [passwords]);
 
   useEffect(() => {
+    localStorage.setItem(AVATARS_KEY, JSON.stringify(avatars));
+  }, [avatars]);
+
+  useEffect(() => {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(clubSettings));
   }, [clubSettings]);
+
+  // Keep currentUser avatar in sync when avatars state changes
+  useEffect(() => {
+    if (currentUser && avatars[currentUser.id] && currentUser.avatar !== avatars[currentUser.id]) {
+      setCurrentUser(prev => ({
+        ...prev,
+        avatar: avatars[currentUser.id]
+      }));
+    }
+  }, [avatars, currentUser]);
+
+  const updateAvatar = (memberId, newAvatarUrl) => {
+    setAvatars(prev => ({
+      ...prev,
+      [memberId]: newAvatarUrl
+    }));
+
+    if (currentUser && currentUser.id === memberId) {
+      setCurrentUser(prev => ({
+        ...prev,
+        avatar: newAvatarUrl
+      }));
+    }
+  };
+
+  const getMemberAvatar = (memberId) => {
+    if (avatars[memberId]) return avatars[memberId];
+    const member = MEMBERS.find(m => m.id === memberId);
+    return member ? member.avatar : `https://ui-avatars.com/api/?name=${memberId}&background=6366f1&color=ffffff`;
+  };
+
+  const allMembers = MEMBERS.map(m => ({
+    ...m,
+    avatar: avatars[m.id] || m.avatar
+  }));
 
   const login = (identifier, password) => {
     const cleanId = identifier.trim().toLowerCase();
@@ -91,8 +145,13 @@ export const AuthProvider = ({ children }) => {
       };
     }
 
-    setCurrentUser(member);
-    return { success: true, member };
+    const memberWithCustomAvatar = {
+      ...member,
+      avatar: avatars[member.id] || member.avatar
+    };
+
+    setCurrentUser(memberWithCustomAvatar);
+    return { success: true, member: memberWithCustomAvatar };
   };
 
   const logout = () => {
@@ -115,7 +174,11 @@ export const AuthProvider = ({ children }) => {
   const switchUser = (memberId) => {
     const member = MEMBERS.find(m => m.id === memberId);
     if (member) {
-      setCurrentUser(member);
+      const memberWithCustomAvatar = {
+        ...member,
+        avatar: avatars[member.id] || member.avatar
+      };
+      setCurrentUser(memberWithCustomAvatar);
     }
   };
 
@@ -128,9 +191,12 @@ export const AuthProvider = ({ children }) => {
         switchUser,
         changePassword,
         passwords,
+        avatars,
+        updateAvatar,
+        getMemberAvatar,
         clubSettings,
         updateClubSettings,
-        allMembers: MEMBERS
+        allMembers
       }}
     >
       {children}

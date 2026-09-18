@@ -107,7 +107,8 @@ const getInitialState = () => {
     ],
     activities: [
       { id: 'act-1', text: 'Cloud storage server active.', time: 'Just now', type: 'system' }
-    ]
+    ],
+    avatars: {}
   };
 };
 
@@ -299,6 +300,14 @@ io.on('connection', (socket) => {
       saveDb();
       io.emit('meeting:notes_updated', { meetingId, notes });
     }
+  });
+
+  // Profile Avatar Updates
+  socket.on('avatar:update', ({ memberId, avatarUrl }) => {
+    db.avatars = db.avatars || {};
+    db.avatars[memberId] = avatarUrl;
+    saveDb();
+    io.emit('avatar:updated', { memberId, avatarUrl });
   });
 
   socket.on('disconnect', () => {

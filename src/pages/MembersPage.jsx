@@ -8,15 +8,15 @@ import {
   MessageSquare, 
   Sparkles, 
   Plus, 
-  ExternalLink 
+  ExternalLink,
+  Camera
 } from 'lucide-react';
-import { MEMBERS } from '../data/members';
 import { useClubData } from '../context/ClubDataContext';
 import { useAuth } from '../context/AuthContext';
 
-export const MembersPage = ({ setCurrentTab, onOpenTaskModal }) => {
+export const MembersPage = ({ setCurrentTab, onOpenTaskModal, onOpenProfileModal }) => {
   const { tasks } = useClubData();
-  const { currentUser } = useAuth();
+  const { currentUser, allMembers } = useAuth();
   const [filterLevel, setFilterLevel] = useState('all');
 
   const levels = [
@@ -27,8 +27,8 @@ export const MembersPage = ({ setCurrentTab, onOpenTaskModal }) => {
   ];
 
   const filteredMembers = filterLevel === 'all' 
-    ? MEMBERS 
-    : MEMBERS.filter(m => m.level === filterLevel);
+    ? allMembers 
+    : allMembers.filter(m => m.level === filterLevel);
 
   return (
     <div className="space-y-6 pb-12">
@@ -139,6 +139,17 @@ export const MembersPage = ({ setCurrentTab, onOpenTaskModal }) => {
                 </div>
 
                 <div className="flex items-center gap-1.5">
+                  {isCurrentUser && (
+                    <button
+                      onClick={onOpenProfileModal}
+                      className="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md shadow-indigo-600/20"
+                      title="Upload or Change Your Photo"
+                    >
+                      <Camera className="w-3.5 h-3.5" />
+                      <span>Edit Photo</span>
+                    </button>
+                  )}
+
                   <button
                     onClick={() => {
                       setCurrentTab('chat');
